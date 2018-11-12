@@ -1,4 +1,4 @@
-# Deploy Palo Alto Networks Firewalls to Existing VNET
+# Deploy Transit Environment with Palo Alto Networks VM-Series in LB Sandwich
 
 **This template is not supported by Palo Alto Networks.** 
 </br>
