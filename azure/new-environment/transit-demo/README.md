@@ -1,4 +1,4 @@
-# Transit Network with Palo Alto Networks VM-Series in LB Sandwich
+# Deploy Transit Network with VM-Series in LB Sandwich
 
 **This template is not supported by Palo Alto Networks.** 
 </br>
