@@ -303,6 +303,14 @@
       "type": "string",
       "defaultValue": "22"
     },
+    "publicLbRule1Name": {
+      "type": "string",
+      "defaultValue": "tcp-80"
+    },
+    "publicLbRule2Name": {
+      "type": "string",
+      "defaultValue": "tcp-22"
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]"
@@ -948,13 +956,33 @@
             ],
             "loadBalancingRules": [
                 {
-                    "name": "[parameters('publicLbFrontendName')]",
+                    "name": "[parameters('publicLbRule1Name')]",
                     "properties": {
                         "frontendIPConfiguration": {
                             "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('publicLbName')), '/frontendIPConfigurations/', parameters('publicLbFrontendName'))]"
                         },
                         "frontendPort": 80,
                         "backendPort": 80,
+                        "enableFloatingIP": false,
+                        "idleTimeoutInMinutes": 4,
+                        "protocol": "Tcp",
+                        "loadDistribution": "Default",
+                        "backendAddressPool": {
+                            "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('publicLbName')), '/backendAddressPools/', parameters('publicLbBackendPoolName'))]"
+                        },
+                        "probe": {
+                            "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('publicLbName')), '/probes/', parameters('publicLbProbeName'))]"
+                        }
+                    }
+                },
+                {
+                    "name": "[parameters('publicLbRule2Name')]",
+                    "properties": {
+                        "frontendIPConfiguration": {
+                            "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('publicLbName')), '/frontendIPConfigurations/', parameters('publicLbFrontendName'))]"
+                        },
+                        "frontendPort": 22,
+                        "backendPort": 22,
                         "enableFloatingIP": false,
                         "idleTimeoutInMinutes": 4,
                         "protocol": "Tcp",
