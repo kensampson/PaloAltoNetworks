@@ -526,7 +526,7 @@
             <disable-telnet>yes</disable-telnet>
             <disable-http>yes</disable-http>
           </service>
-          <hostname>vm-paloalto-1</hostname>
+          <hostname>vm-paloalto-2</hostname>
         </system>
         <setting>
           <config>
