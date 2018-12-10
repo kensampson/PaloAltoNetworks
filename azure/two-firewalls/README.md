@@ -1,4 +1,4 @@
-# Deploy Palo Alto Networks Firewalls to Existing VNET
+# Deploy Two Palo Alto Networks Firewalls with Managed Disks
 
 **This template is not supported by Palo Alto Networks.** 
 </br>
