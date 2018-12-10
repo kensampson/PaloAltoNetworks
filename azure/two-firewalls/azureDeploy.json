@@ -371,7 +371,7 @@
               "name": "[parameters('nameFW1')]",
               "location": "[resourceGroup().location]",
               "plan": {
-                "name": "byol",
+                "name": "[parameters('FWLicenseType')]",
                 "product": "vmseries1",
                 "publisher": "paloaltonetworks"
               },
@@ -432,7 +432,7 @@
               "name": "[parameters('nameFW2')]",
               "location": "[resourceGroup().location]",
               "plan": {
-                "name": "byol",
+                "name": "[parameters('FWLicenseType')]",
                 "product": "vmseries1",
                 "publisher": "paloaltonetworks"
               },
