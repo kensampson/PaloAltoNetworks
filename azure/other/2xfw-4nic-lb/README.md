@@ -3,7 +3,7 @@
 </br>
 
 
-[<img src="http://azuredeploy.net/deploybutton.png"/>](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmattmclimans%2FPaloAltoNetworks%2Fmaster%2Fazure%2Ftwo-firewalls%2FazureDeploy.json)
+[<img src="http://azuredeploy.net/deploybutton.png"/>](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmattmclimans%2FPaloAltoNetworks%2Fmaster%2Fazure%2Fother%2F2xfw-4nic-lb%2FazureDeploy.json)
 
 ### Prerequisites
 1.  Existing VNET with 4 subnets.  Load balancer can be placed in any subnet within the VNET.
