@@ -1,0 +1,844 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "nameFW1": {
+      "type": "string",
+      "defaultValue": "FW-1"
+    },
+    "nameFW2": {
+      "type": "string",
+      "defaultValue": "FW-2"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "paloalto"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "FWLicenseType": {
+      "type": "string",
+      "defaultValue": "byol",
+      "allowedValues": [
+        "byol",
+        "bundle1",
+        "bundle2"
+      ]
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS3_v2",
+      "allowedValues": [
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_A4",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2"
+      ]
+    },
+    "managementNsgName": {
+      "type": "string",
+      "defaultValue": "management-nsg"
+    },
+    "managementNsgSourceIp": {
+      "type": "string",
+      "defaultValue": "0.0.0.0/0"
+    },
+    "dataplaneNsgName": {
+      "type": "string",
+      "defaultValue": "dataplane-nsg"
+    },
+    "fwAvailabilitySetName": {
+      "type": "string",
+      "defaultValue": "firewall-av-set"
+    },
+    "vnetName": {
+      "type": "string"
+    },
+    "vnetResourceGroup": {
+      "type": "string"
+    },
+    "subnet0Name": {
+      "type": "string",
+      "defaultValue": "subnet-0"
+    },
+    "subnet1Name": {
+      "type": "string",
+      "defaultValue": "subnet-1"
+    },
+    "subnet2Name": {
+      "type": "string",
+      "defaultValue": "subnet-2"
+    },
+    "subnet3Name": {
+      "type": "string",
+      "defaultValue": "subnet-3"
+    },
+    "vnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "subnet0Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    },
+    "subnet1Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24"
+    },
+    "subnet2Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24"
+    },
+    "subnet3Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.3.0/24"
+    },
+    "IpNic0-FW1": {
+      "type": "string",
+      "defaultValue": "10.0.0.4"
+    },
+    "IpNic1-FW1": {
+      "type": "string",
+      "defaultValue": "10.0.1.4"
+    },
+    "IpNic2-FW1": {
+      "type": "string",
+      "defaultValue": "10.0.2.4"
+    },
+    "IpNic3-FW1": {
+      "type": "string",
+      "defaultValue": "10.0.3.4"
+    },
+    "IpNic0-FW2": {
+      "type": "string",
+      "defaultValue": "10.0.0.5"
+    },
+    "IpNic1-FW2": {
+      "type": "string",
+      "defaultValue": "10.0.1.5"
+    },
+    "IpNic2-FW2": {
+      "type": "string",
+      "defaultValue": "10.0.2.5"
+    },
+    "IpNic3-FW2": {
+      "type": "string",
+      "defaultValue": "10.0.3.5"
+    },
+    "lbName": {
+      "type": "string",
+      "defaultValue": "firewall-load-balancer"
+    },
+    "lbSubnetName": {
+      "type": "string",
+      "defaultValue": "subnet-1"
+    },
+    "lbFrontEndIpForFwNic1": {
+      "type": "string",
+      "defaultValue": "10.0.1.10"
+    },
+    "lbFrontEndIpForFwNic2": {
+      "type": "string",
+      "defaultValue": "10.0.1.20"
+    },
+    "lbFrontEndIpForFwNic3": {
+      "type": "string",
+      "defaultValue": "10.0.1.30"
+    }
+  },
+  "variables": {
+    "nic0NameFW1": "[concat(parameters('nameFW1'),'-eth0')]",
+    "nic1NameFW1": "[concat(parameters('nameFW1'),'-eth1')]",
+    "nic2NameFW1": "[concat(parameters('nameFW1'),'-eth2')]",
+    "nic3NameFW1": "[concat(parameters('nameFW1'),'-eth3')]",
+    "nic0NameFW2": "[concat(parameters('nameFW2'),'-eth0')]",
+    "nic1NameFW2": "[concat(parameters('nameFW2'),'-eth1')]",
+    "nic2NameFW2": "[concat(parameters('nameFW2'),'-eth2')]",
+    "nic3NameFW2": "[concat(parameters('nameFW2'),'-eth3')]",
+    "nic0PipNameFW1": "[concat(parameters('nameFW1'),'-pip-eth0')]",
+    "nic3PipNameFW1": "[concat(parameters('nameFW1'),'-pip-eth1')]",
+    "nic0PipNameFW2": "[concat(parameters('nameFW2'),'-pip-eth0')]",
+    "nic3PipNameFW2": "[concat(parameters('nameFW2'),'-pip-eth1')]",
+    "vnetID": "[resourceId(parameters('vnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnet0Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet0Name'))]",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
+    "subnet2Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet2Name'))]",
+    "subnet3Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet3Name'))]"
+  },
+  "resources": [{
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('dataplaneNsgName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [{
+            "name": "Allow-All-In",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "Allow-All-Out",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Outbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('managementNsgName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [{
+            "name": "allow-ssh",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('managementNsgSourceIp')]",
+              "destinationAddressPrefix": "22",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "allow-https",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('managementNsgSourceIp')]",
+              "destinationAddressPrefix": "443",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('nic0PipNameFW1')]",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('nic0PipNameFW2')]",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('nic3PipNameFW1')]",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('nic3PipNameFW2')]",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic0NameFW1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet0Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic0-FW1')]",
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW1'))]"
+            }
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW1'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic0NameFW2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet0Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic0-FW2')]",
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW2'))]"
+            }
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW2'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic1NameFW1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet1Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic1-FW1')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-1')]"
+            }]
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic1NameFW2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet1Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic1-FW2')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-1')]"
+            }]
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic2NameFW1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet2Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic2-FW1')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-2')]"
+            }]
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic2NameFW2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet2Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic2-FW2')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-2')]"
+            }]
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic3NameFW1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet3Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic3-FW1')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-3')]"
+            }],
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW1'))]"
+            }
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW1'))]"
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nic3NameFW2')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Static",
+            "subnet": {
+              "id": "[variables('subnet3Ref')]"
+            },
+            "privateIpAddress": "[parameters('IpNic3-FW2')]",
+            "loadBalancerBackendAddressPools": [{
+              "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-3')]"
+            }],
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW2'))]"
+            }
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW2'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('fwAvailabilitySetName')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformUpdateDomainCount": 2,
+        "platformFaultDomainCount": 2
+      },
+      "sku": {
+        "name": "Aligned"
+      }
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('lbName')]",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "frontendIPConfigurations": [{
+            "name": "frontend-1",
+            "properties": {
+              "privateIPAddress": "[parameters('lbFrontEndIpForFwNic1')]",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/', parameters('lbSubnetName'))]"
+              }
+            }
+          },
+          {
+            "name": "frontend-2",
+            "properties": {
+              "privateIPAddress": "[parameters('lbFrontEndIpForFwNic2')]",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/', parameters('lbSubnetName'))]"
+              }
+            }
+          },
+          {
+            "name": "frontend-3",
+            "properties": {
+              "privateIPAddress": "[parameters('lbFrontEndIpForFwNic3')]",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '/subnets/', parameters('lbSubnetName'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [{
+            "name": "backend-pool-1"
+          },
+          {
+            "name": "backend-pool-2"
+          },
+          {
+            "name": "backend-pool-3"
+          }
+        ],
+        "loadBalancingRules": [{
+            "name": "HA-Ports-1",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/frontendIPConfigurations/', 'frontend-1')]"
+              },
+              "frontendPort": 0,
+              "backendPort": 0,
+              "enableFloatingIP": true,
+              "idleTimeoutInMinutes": 4,
+              "protocol": "All",
+              "loadDistribution": "Default",
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-1')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/probes/TCP-22')]"
+              }
+            }
+          },
+          {
+            "name": "HA-Ports-2",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/frontendIPConfigurations/', 'frontend-2')]"
+              },
+              "frontendPort": 0,
+              "backendPort": 0,
+              "enableFloatingIP": true,
+              "idleTimeoutInMinutes": 4,
+              "protocol": "All",
+              "loadDistribution": "Default",
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-2')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/probes/TCP-22')]"
+              }
+            }
+          },
+          {
+            "name": "HA-Ports-3",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/frontendIPConfigurations/', 'frontend-3')]"
+              },
+              "frontendPort": 0,
+              "backendPort": 0,
+              "enableFloatingIP": true,
+              "idleTimeoutInMinutes": 4,
+              "protocol": "All",
+              "loadDistribution": "Default",
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/backendAddressPools/', 'backend-pool-2')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/probes/TCP-22')]"
+              }
+            }
+          }
+        ],
+        "probes": [{
+          "name": "TCP-22",
+          "properties": {
+            "protocol": "Tcp",
+            "port": 22,
+            "intervalInSeconds": 5,
+            "numberOfProbes": 2
+          }
+        }]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/availabilitySets', parameters('fwAvailabilitySetName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('nameFW1')]",
+      "location": "[resourceGroup().location]",
+      "plan": {
+        "name": "[parameters('FWLicenseType')]",
+        "product": "vmseries1",
+        "publisher": "paloaltonetworks"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('fwAvailabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('nameFW1')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "paloaltonetworks",
+            "offer": "vmseries1",
+            "sku": "[parameters('FWLicenseType')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [{
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic0NameFW1'))]",
+              "properties": {
+                "primary": true
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1NameFW1'))]",
+              "properties": {
+                "primary": false
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2NameFW1'))]",
+              "properties": {
+                "primary": false
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic3NameFW1'))]",
+              "properties": {
+                "primary": false
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW1'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW1'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic0NameFW1'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1NameFW1'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2NameFW1'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic3NameFW1'))]",
+        "[resourceId('Microsoft.Compute/availabilitySets', parameters('fwAvailabilitySetName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('nameFW2')]",
+      "location": "[resourceGroup().location]",
+      "plan": {
+        "name": "[parameters('FWLicenseType')]",
+        "product": "vmseries1",
+        "publisher": "paloaltonetworks"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('fwAvailabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('nameFW2')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "paloaltonetworks",
+            "offer": "vmseries1",
+            "sku": "[parameters('FWLicenseType')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [{
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic0NameFW2'))]",
+              "properties": {
+                "primary": true
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1NameFW2'))]",
+              "properties": {
+                "primary": false
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2NameFW2'))]",
+              "properties": {
+                "primary": false
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic3NameFW2'))]",
+              "properties": {
+                "primary": false
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic0PipNameFW2'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('nic3PipNameFW2'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic0NameFW2'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1NameFW2'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2NameFW2'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic3NameFW2'))]",
+        "[resourceId('Microsoft.Compute/availabilitySets', parameters('fwAvailabilitySetName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('managementNsgName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('dataplaneNsgName'))]"
+      ]
+    }
+  ]
+}
