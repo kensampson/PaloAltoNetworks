@@ -218,14 +218,16 @@
         "securityRules": [{
             "name": "allow-ssh",
             "properties": {
-              "protocol": "*",
+              "protocol": "TCP",
               "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "[parameters('managementNsgSourceIp')]",
-              "destinationAddressPrefix": "22",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 100,
               "direction": "Inbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
               "sourceAddressPrefixes": [],
               "destinationAddressPrefixes": []
             }
@@ -233,14 +235,16 @@
           {
             "name": "allow-https",
             "properties": {
-              "protocol": "*",
+              "protocol": "TCP",
               "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "[parameters('managementNsgSourceIp')]",
-              "destinationAddressPrefix": "443",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 200,
               "direction": "Inbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
               "sourceAddressPrefixes": [],
               "destinationAddressPrefixes": []
             }
