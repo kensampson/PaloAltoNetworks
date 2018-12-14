@@ -136,19 +136,19 @@
     },
     "lbSubnetName": {
       "type": "string",
-      "defaultValue": "subnet-1"
+      "defaultValue": "subnet-3"
     },
     "lbFrontEndIpForFwNic1": {
       "type": "string",
-      "defaultValue": "10.0.1.10"
+      "defaultValue": "10.0.3.10"
     },
     "lbFrontEndIpForFwNic2": {
       "type": "string",
-      "defaultValue": "10.0.1.20"
+      "defaultValue": "10.0.3.20"
     },
     "lbFrontEndIpForFwNic3": {
       "type": "string",
-      "defaultValue": "10.0.1.30"
+      "defaultValue": "10.0.3.30"
     }
   },
   "variables": {
