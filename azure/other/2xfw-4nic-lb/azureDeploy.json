@@ -44,10 +44,6 @@
       "type": "string",
       "defaultValue": "management-nsg"
     },
-    "managementNsgSourceIp": {
-      "type": "string",
-      "defaultValue": "0.0.0.0/0"
-    },
     "dataplaneNsgName": {
       "type": "string",
       "defaultValue": "dataplane-nsg"
