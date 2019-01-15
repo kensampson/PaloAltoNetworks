@@ -36,6 +36,61 @@
         "Standard_DS5_v2"
       ]
     },
+    "newOrExistingVNET": {
+      "type": "string",
+      "defaultValue": "Create a new VNET",
+      "allowedValues": [
+        "Create a new VNET",
+        "Use an existing VNET"
+      ]
+    },
+    "enterNewOrExistingVnetName": {
+      "type": "string",
+      "defaultValue": "fwVNET"
+    },
+    "enterNewOrExistingVnetResourceGroup": {
+      "type": "string"
+    },
+    "enterNewOrExistingMgmtSubnetName": {
+      "type": "string",
+      "defaultValue": "mgmt-subnet"
+    },
+    "enterNewOrExistingUntrustSubnetName": {
+      "type": "string",
+      "defaultValue": "untrust-subnet"
+    },
+    "enterNewOrExistingTrustSubnetName": {
+      "type": "string",
+      "defaultValue": "trust-subnet"
+    },
+    "enterNewOrExistingVnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "enterNewOrExistingMgmtSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    },
+    "enterNewOrExistingUntrustSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24"
+    },
+    "enterNewOrExistingTrustSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24"
+    },
+    "mgmtIpFW1": {
+      "type": "string",
+      "defaultValue": "10.0.0.4"
+    },
+    "untrustIpFW1": {
+      "type": "string",
+      "defaultValue": "10.0.1.4"
+    },
+    "trustIpFW1": {
+      "type": "string",
+      "defaultValue": "10.0.2.4"
+    },
     "newOrExistingAvailabilitySet": {
       "type": "string",
       "defaultValue": "Create a new availability set",
@@ -47,62 +102,6 @@
     "enterNewOrExistingAvailabilitySetName": {
       "type": "string",
       "defaultValue": "firewall-av-set"
-    },
-    "newOrExistingVNET": {
-      "type": "string",
-      "defaultValue": "Create a new VNET",
-      "allowedValues": [
-        "Create a new VNET",
-        "Use an existing VNET"
-      ]
-    },
-    "enterNewOrExistingVnetName": {
-      "type": "string",
-      "defaultValue": "pan-VNET"
-    },
-    "enterNewOrExistingVnetResourceGroup": {
-      "type": "string",
-      "defaultValue": "vnet-rg"
-    },
-    "enterNewOrExistingMgmtSubnetName": {
-      "type": "string",
-      "defaultValue": "mgmt"
-    },
-    "enterNewOrExistingUntrustSubnetName": {
-      "type": "string",
-      "defaultValue": "untrust"
-    },
-    "enterNewOrExistingTrustSubnetName": {
-      "type": "string",
-      "defaultValue": "trust"
-    },
-    "enterNewOrExistingVnetPrefix": {
-      "type": "string",
-      "defaultValue": "100.10.0.0/16"
-    },
-    "enterNewOrExistingMgmtSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "100.10.0.0/24"
-    },
-    "enterNewOrExistingUntrustSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "100.10.1.0/24"
-    },
-    "enterNewOrExistingTrustSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "100.10.2.0/24"
-    },
-    "mgmtIpFW1": {
-      "type": "string",
-      "defaultValue": "100.10.0.4"
-    },
-    "untrustIpFW1": {
-      "type": "string",
-      "defaultValue": "100.10.1.4"
-    },
-    "trustIpFW1": {
-      "type": "string",
-      "defaultValue": "100.10.2.4"
     }
   },
   "variables": {
