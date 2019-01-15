@@ -1,4 +1,4 @@
-# Deploy Two Palo Alto Networks Firewalls with new/existing AV Set
+# Deploy 1 Palo Alto Networks Firewalls with AV Set
 
 </br>
 
