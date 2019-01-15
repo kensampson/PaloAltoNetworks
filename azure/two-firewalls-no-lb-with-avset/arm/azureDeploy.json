@@ -53,8 +53,7 @@
       "defaultValue": "fwVNET"
     },
     "enterNewOrExistingVnetResourceGroup": {
-      "type": "string",
-      "defaultValue": "vnet-rg"
+      "type": "string"
     },
     "enterNewOrExistingMgmtSubnetName": {
       "type": "string",
