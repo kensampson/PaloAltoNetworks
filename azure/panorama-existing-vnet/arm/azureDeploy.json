@@ -62,7 +62,7 @@
     },
     "nsgSourceIpAddress": {
       "type": "string",
-      "defaultValue": "1.1.1.1/32"
+      "defaultValue": "0.0.0.0/0"
     }
   },
   "variables": {
