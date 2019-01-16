@@ -4,7 +4,7 @@
   "parameters": {
     "panoramaName": {
       "type": "string",
-      "defaultValue": "panorama-vm1"
+      "defaultValue": "panorama-vm"
     },
     "adminUsername": {
       "type": "string",
@@ -26,14 +26,13 @@
       "defaultValue": "fwVNET"
     },
     "enterExistingVnetResourceGroup": {
-      "type": "string",
-      "defaultValue": "vnet-rg"
+      "type": "string"
     },
     "enterExistingSubnetName": {
       "type": "string",
       "defaultValue": "mgmt-subnet"
     },
-    "panoramaMgmtIp": {
+    "panoramaPrivateIpAddress": {
       "type": "string",
       "defaultValue": "10.0.0.4"
     },
@@ -177,7 +176,7 @@
                       "subnet": {
                         "id": "[variables('mgmtSubnetRef')]"
                       },
-                      "privateIpAddress": "[parameters('panoramaMgmtIp')]",
+                      "privateIpAddress": "[parameters('panoramaPrivateIpAddress')]",
                       "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
                       }
@@ -225,7 +224,7 @@
                       "subnet": {
                         "id": "[variables('mgmtSubnetRef')]"
                       },
-                      "privateIpAddress": "[parameters('panoramaMgmtIp')]",
+                      "privateIpAddress": "[parameters('panoramaPrivateIpAddress')]",
                       "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
                       }
