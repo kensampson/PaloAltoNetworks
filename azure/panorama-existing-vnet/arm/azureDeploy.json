@@ -4,19 +4,18 @@
   "parameters": {
     "panoramaName": {
       "type": "string",
-      "defaultValue": "panorama-1"
+      "defaultValue": "panorama-vm1"
     },
     "adminUsername": {
       "type": "string",
       "defaultValue": "paloalto"
     },
     "adminPassword": {
-      "type": "securestring",
-      "defaultValue": "PanPassword123!"
+      "type": "securestring"
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_D5_v2",
+      "defaultValue": "Standard_D3_v2",
       "allowedValues": [
         "Standard_D3_v2",
         "Standard_D5_v2"
@@ -26,10 +25,6 @@
       "type": "string",
       "defaultValue": "fwVNET"
     },
-    "enterExistingVnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16"
-    },
     "enterExistingVnetResourceGroup": {
       "type": "string",
       "defaultValue": "vnet-rg"
@@ -38,12 +33,6 @@
       "type": "string",
       "defaultValue": "mgmt-subnet"
     },
-
-    "enterExistingSubnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/24"
-    },
-
     "panoramaMgmtIp": {
       "type": "string",
       "defaultValue": "10.0.0.4"
@@ -67,7 +56,6 @@
       "type": "string",
       "defaultValue": "panorama-av-set"
     },
-
     "mgmtNsgName": {
       "type": "string",
       "defaultValue": "panorama-mgmt-nsg"
@@ -85,271 +73,271 @@
     "mgmtplaneNsgInboundRule1Name": "inbound-ssh",
     "mgmtplaneNsgInboundRule2Name": "inbound-https"
   },
-    "resources": [
-      {
-        "apiVersion": "2017-05-10",
-        "name": "mgmtplaneNsgNestedTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "resourceGroup": "[resourceGroup().name]",
-        "properties": {
-          "mode": "Incremental",
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": [
-              {
-                "type": "Microsoft.Network/networkSecurityGroups",
-                "name": "[parameters('mgmtNsgName')]",
-                "apiVersion": "2017-06-01",
-                "location": "[resourceGroup().location]",
-                "properties": {
-                  "securityRules": [
-                    {
-                      "name": "[variables('mgmtplaneNsgInboundRule1Name')]",
-                      "properties": {
-                        "protocol": "TCP",
-                        "sourcePortRange": "*",
-                        "destinationPortRange": "22",
-                        "sourceAddressPrefix": "[parameters('nsgSourceIpAddress')]",
-                        "destinationAddressPrefix": "*",
-                        "access": "Allow",
-                        "priority": 100,
-                        "direction": "Inbound",
-                        "sourceAddressPrefixes": [],
-                        "destinationAddressPrefixes": []
-                      }
-                    },
-                    {
-                      "name": "[variables('mgmtplaneNsgInboundRule2Name')]",
-                      "properties": {
-                        "protocol": "TCP",
-                        "sourcePortRange": "*",
-                        "destinationPortRange": "443",
-                        "sourceAddressPrefix": "[parameters('nsgSourceIpAddress')]",
-                        "destinationAddressPrefix": "*",
-                        "access": "Allow",
-                        "priority": 101,
-                        "direction": "Inbound",
-                        "sourceAddressPrefixes": [],
-                        "destinationAddressPrefixes": []
-                      }
+  "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "mgmtplaneNsgNestedTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "name": "[parameters('mgmtNsgName')]",
+              "apiVersion": "2017-06-01",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "[variables('mgmtplaneNsgInboundRule1Name')]",
+                    "properties": {
+                      "protocol": "TCP",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "22",
+                      "sourceAddressPrefix": "[parameters('nsgSourceIpAddress')]",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 100,
+                      "direction": "Inbound",
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
                     }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "condition": "[equals(parameters('assignPublicIp'), 'Yes')]",
-        "apiVersion": "2017-05-10",
-        "name": "nestedNicWithPipTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "resourceGroup": "[resourceGroup().name]",
-        "dependsOn": [
-          "mgmtplaneNsgNestedTemplate"
-        ],
-        "properties": {
-          "mode": "Incremental",
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": [
-              {
-                "type": "Microsoft.Network/publicIPAddresses",
-                "name": "[variables('panoramaPipName')]",
-                "apiVersion": "2017-08-01",
-                "location": "[resourceGroup().location]",
-                "sku": {
-                  "name": "Standard"
-                },
-                "properties": {
-                  "publicIPAllocationMethod": "Static",
-                  "idleTimeoutInMinutes": 4
-                }
-              },
-              {
-                "apiVersion": "2015-06-15",
-                "type": "Microsoft.Network/networkInterfaces",
-                "name": "[variables('panoramaNicName')]",
-                "location": "[resourceGroup().location]",
-                "dependsOn": [
-                  "[resourceId('Microsoft.Network/publicIPAddresses/', variables('panoramaPipName'))]"
-                ],
-                "properties": {
-                  "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNsgName'))]"
                   },
-                  "ipConfigurations": [
-                    {
-                      "name": "ipconfig1",
-                      "properties": {
-                        "privateIPAllocationMethod": "Static",
-                        "subnet": {
-                          "id": "[variables('mgmtSubnetRef')]"
-                        },
-                        "privateIpAddress": "[parameters('panoramaMgmtIp')]",
-                        "publicIPAddress": {
-                          "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
-                        }
-                      }
+                  {
+                    "name": "[variables('mgmtplaneNsgInboundRule2Name')]",
+                    "properties": {
+                      "protocol": "TCP",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "443",
+                      "sourceAddressPrefix": "[parameters('nsgSourceIpAddress')]",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 101,
+                      "direction": "Inbound",
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
                     }
-                  ]
-                }
+                  }
+                ]
               }
-            ]
-          }
-        }
-      },
-      {
-        "condition": "[equals(parameters('assignPublicIp'), 'No')]",
-        "apiVersion": "2017-05-10",
-        "name": "nestedNicTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "resourceGroup": "[resourceGroup().name]",
-        "dependsOn": [
-          "mgmtplaneNsgNestedTemplate"
-        ],
-        "properties": {
-          "mode": "Incremental",
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": [
-              {
-                "apiVersion": "2015-06-15",
-                "type": "Microsoft.Network/networkInterfaces",
-                "name": "[variables('panoramaNicName')]",
-                "location": "[resourceGroup().location]",
-                "dependsOn": [
-                  "[resourceId('Microsoft.Network/publicIPAddresses/', variables('panoramaPipName'))]"
-                ],
-                "properties": {
-                  "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNsgName'))]"
-                  },
-                  "ipConfigurations": [
-                    {
-                      "name": "ipconfig1",
-                      "properties": {
-                        "privateIPAllocationMethod": "Static",
-                        "subnet": {
-                          "id": "[variables('mgmtSubnetRef')]"
-                        },
-                        "privateIpAddress": "[parameters('panoramaMgmtIp')]",
-                        "publicIPAddress": {
-                          "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "condition": "[equals(parameters('newOrExistingAvailabilitySet'), 'Create a new availability set')]",
-        "apiVersion": "2017-05-10",
-        "name": "availabilitySetNestedTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "resourceGroup": "[resourceGroup().name]",
-        "properties": {
-          "mode": "Incremental",
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": [
-              {
-                "type": "Microsoft.Compute/availabilitySets",
-                "name": "[parameters('availabilitySetName')]",
-                "apiVersion": "2016-04-30-preview",
-                "location": "[resourceGroup().location]",
-                "properties": {
-                  "platformUpdateDomainCount": 2,
-                  "platformFaultDomainCount": 2
-                },
-                "sku": {
-                  "name": "Aligned"
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "condition": "[equals(parameters('newOrExistingAvailabilitySet'), 'Create a new availability set')]",
-        "apiVersion": "2017-05-10",
-        "name": "panoramaNestedTemplate",
-        "type": "Microsoft.Resources/deployments",
-        "resourceGroup": "[resourceGroup().name]",
-        "dependsOn": [
-          "mgmtplaneNsgNestedTemplate",
-          "nestedNicTemplate",
-          "nestedNicWithPipTemplate",
-          "availabilitySetNestedTemplate"
-        ],
-        "properties": {
-          "mode": "Incremental",
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": [
-              {
-                  "type": "Microsoft.Compute/virtualMachines",
-                  "name": "[parameters('panoramaName')]",
-                  "apiVersion": "2018-06-01",
-                  "location": "[resourceGroup().location]",
-                  "plan": {
-                      "name": "byol",
-                      "product": "panorama",
-                      "publisher": "paloaltonetworks"
-                  },
-                  "tags": {},
-                  "scale": null,
-                  "properties": {
-                      "hardwareProfile": {
-                          "vmSize": "[parameters('vmSize')]"
-                      },
-                      "storageProfile": {
-                          "imageReference": {
-                              "publisher": "paloaltonetworks",
-                              "offer": "panorama",
-                              "sku": "byol",
-                              "version": "8.1.2"
-                          },
-                          "osDisk": {
-                            "managedDisk": {
-                              "storageAccountType": "StandardSSD_LRS"
-                            },
-                            "caching": "ReadWrite",
-                            "createOption": "FromImage"
-                          }
-                      },
-                      "osProfile": {
-                          "computerName": "[parameters('panoramaName')]",
-                          "adminUsername": "[parameters('adminUsername')]",
-                          "adminPassword": "[parameters('adminPassword')]",
-                          "allowExtensionOperations": true
-                      },
-                      "networkProfile": {
-                          "networkInterfaces": [
-                            {
-                              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('panoramaNicName'))]",
-                              "properties": {
-                                "primary": true
-                              }
-                            }
-                          ]
-                      }
-                  },
-                  "dependsOn": []
-              }
-            ]
-          }
+            }
+          ]
         }
       }
-    ]
+    },
+    {
+      "condition": "[equals(parameters('assignPublicIp'), 'Yes')]",
+      "apiVersion": "2017-05-10",
+      "name": "nestedNicWithPipTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "dependsOn": [
+        "mgmtplaneNsgNestedTemplate"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "name": "[variables('panoramaPipName')]",
+              "apiVersion": "2017-08-01",
+              "location": "[resourceGroup().location]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4
+              }
+            },
+            {
+              "apiVersion": "2015-06-15",
+              "type": "Microsoft.Network/networkInterfaces",
+              "name": "[variables('panoramaNicName')]",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses/', variables('panoramaPipName'))]"
+              ],
+              "properties": {
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNsgName'))]"
+                },
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Static",
+                      "subnet": {
+                        "id": "[variables('mgmtSubnetRef')]"
+                      },
+                      "privateIpAddress": "[parameters('panoramaMgmtIp')]",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('assignPublicIp'), 'No')]",
+      "apiVersion": "2017-05-10",
+      "name": "nestedNicTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "dependsOn": [
+        "mgmtplaneNsgNestedTemplate"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "apiVersion": "2015-06-15",
+              "type": "Microsoft.Network/networkInterfaces",
+              "name": "[variables('panoramaNicName')]",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses/', variables('panoramaPipName'))]"
+              ],
+              "properties": {
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('mgmtNsgName'))]"
+                },
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Static",
+                      "subnet": {
+                        "id": "[variables('mgmtSubnetRef')]"
+                      },
+                      "privateIpAddress": "[parameters('panoramaMgmtIp')]",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('panoramaPipName'))]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('newOrExistingAvailabilitySet'), 'Create a new availability set')]",
+      "apiVersion": "2017-05-10",
+      "name": "availabilitySetNestedTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Compute/availabilitySets",
+              "name": "[parameters('availabilitySetName')]",
+              "apiVersion": "2016-04-30-preview",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "platformUpdateDomainCount": 2,
+                "platformFaultDomainCount": 2
+              },
+              "sku": {
+                "name": "Aligned"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('newOrExistingAvailabilitySet'), 'Create a new availability set')]",
+      "apiVersion": "2017-05-10",
+      "name": "panoramaNestedTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "dependsOn": [
+        "mgmtplaneNsgNestedTemplate",
+        "nestedNicTemplate",
+        "nestedNicWithPipTemplate",
+        "availabilitySetNestedTemplate"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "name": "[parameters('panoramaName')]",
+              "apiVersion": "2018-06-01",
+              "location": "[resourceGroup().location]",
+              "plan": {
+                "name": "byol",
+                "product": "panorama",
+                "publisher": "paloaltonetworks"
+              },
+              "tags": {},
+              "scale": null,
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "paloaltonetworks",
+                    "offer": "panorama",
+                    "sku": "byol",
+                    "version": "8.1.2"
+                  },
+                  "osDisk": {
+                    "managedDisk": {
+                      "storageAccountType": "StandardSSD_LRS"
+                    },
+                    "caching": "ReadWrite",
+                    "createOption": "FromImage"
+                  }
+                },
+                "osProfile": {
+                  "computerName": "[parameters('panoramaName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('panoramaNicName'))]",
+                      "properties": {
+                        "primary": true
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": []
+            }
+          ]
+        }
+      }
+    }
+  ]
 }
