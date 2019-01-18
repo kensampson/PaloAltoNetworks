@@ -15,12 +15,10 @@
       "defaultValue": "paloalto"
     },
     "adminPassword": {
-      "type": "securestring",
-      "defaultValue": "PanPassword123!"
+      "type": "securestring"
     },
     "FWLicenseType": {
       "type": "string",
-      "defaultValue": "byol",
       "allowedValues": [
         "byol",
         "bundle1",
@@ -44,43 +42,43 @@
         "Standard_DS5_v2"
       ]
     },
-    "enterVnetName": {
+    "vnetName": {
       "type": "string",
       "defaultValue": "fwVNET"
     },
-    "enterMgmtSubnetName": {
+    "mgmtSubnetName": {
       "type": "string",
       "defaultValue": "mgmt-subnet"
     },
-    "enterUntrustSubnetName": {
+    "untrustSubnetName": {
       "type": "string",
       "defaultValue": "untrust-subnet"
     },
-    "enterTrustSubnetName": {
+    "trustSubnetName": {
       "type": "string",
       "defaultValue": "trust-subnet"
     },
-    "enterLoadBalancerSubnetName": {
+    "loadBalancerSubnetName": {
       "type": "string",
       "defaultValue": "lb-subnet"
     },
-    "enterVnetPrefix": {
+    "vnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/16"
     },
-    "enterMgmtSubnetPrefix": {
+    "mgmtSubnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/24"
     },
-    "enterUntrustSubnetPrefix": {
+    "untrustSubnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.1.0/24"
     },
-    "enterTrustSubnetPrefix": {
+    "trustSubnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.2.0/24"
     },
-    "enterLoadBalancerSubnetPrefix": {
+    "loadBalancerSubnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.3.0/24"
     },
@@ -108,7 +106,7 @@
       "type": "string",
       "defaultValue": "10.0.2.5"
     },
-    "enterAvailabilitySetName": {
+    "availabilitySetName": {
       "type": "string",
       "defaultValue": "fw-av-set"
     },
@@ -164,11 +162,11 @@
     "FW2UntrustNicName": "[concat(parameters('nameFW2'),'-eth1')]",
     "FW2TrustNicName": "[concat(parameters('nameFW2'),'-eth2')]",
 
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('enterVnetName'))]",
-    "mgmtSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('enterMgmtSubnetName'))]",
-    "untrustSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('enterUntrustSubnetName'))]",
-    "trustSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('enterTrustSubnetName'))]",
-    "lbSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('enterLoadBalancerSubnetName'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "mgmtSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]",
+    "untrustSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('untrustSubnetName'))]",
+    "trustSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('trustSubnetName'))]",
+    "lbSubnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('loadBalancerSubnetName'))]",
 
     "publcLbBackendPoolName": "[concat(parameters('publicLbName'),'-pool')]",
     "publicLbPipName": "[concat(parameters('publicLbName'),'-pip')]",
@@ -313,38 +311,38 @@
           "resources": [
             {
               "apiVersion": "2018-06-01",
-              "name": "[parameters('enterVnetName')]",
+              "name": "[parameters('vnetName')]",
               "type": "Microsoft.Network/virtualNetworks",
               "location": "[resourceGroup().location]",
               "properties": {
                 "addressSpace": {
                   "addressPrefixes": [
-                    "[parameters('enterVnetPrefix')]"
+                    "[parameters('vnetPrefix')]"
                   ]
                 },
                 "subnets": [
                   {
-                    "name": "[parameters('enterMgmtSubnetName')]",
+                    "name": "[parameters('mgmtSubnetName')]",
                     "properties": {
-                      "addressPrefix": "[parameters('enterMgmtSubnetPrefix')]"
+                      "addressPrefix": "[parameters('mgmtSubnetPrefix')]"
                     }
                   },
                   {
-                    "name": "[parameters('enterUntrustSubnetName')]",
+                    "name": "[parameters('untrustSubnetName')]",
                     "properties": {
-                      "addressPrefix": "[parameters('enterUntrustSubnetPrefix')]"
+                      "addressPrefix": "[parameters('untrustSubnetPrefix')]"
                     }
                   },
                   {
-                    "name": "[parameters('enterTrustSubnetName')]",
+                    "name": "[parameters('trustSubnetName')]",
                     "properties": {
-                      "addressPrefix": "[parameters('enterTrustSubnetPrefix')]"
+                      "addressPrefix": "[parameters('trustSubnetPrefix')]"
                     }
                   },
                   {
-                    "name": "[parameters('enterLoadBalancerSubnetName')]",
+                    "name": "[parameters('loadBalancerSubnetName')]",
                     "properties": {
-                      "addressPrefix": "[parameters('enterLoadBalancerSubnetPrefix')]"
+                      "addressPrefix": "[parameters('loadBalancerSubnetPrefix')]"
                     }
                   }
                 ]
@@ -544,7 +542,7 @@
           "resources": [
             {
               "type": "Microsoft.Compute/availabilitySets",
-              "name": "[parameters('enterAvailabilitySetName')]",
+              "name": "[parameters('availabilitySetName')]",
               "apiVersion": "2016-04-30-preview",
               "location": "[resourceGroup().location]",
               "dependsOn": [],
@@ -717,7 +715,7 @@
               },
               "properties": {
                 "availabilitySet": {
-                  "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('enterAvailabilitySetName'))]"
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
                 },
                 "hardwareProfile": {
                   "vmSize": "[parameters('vmSize')]"
@@ -926,7 +924,7 @@
               },
               "properties": {
                 "availabilitySet": {
-                  "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('enterAvailabilitySetName'))]"
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
                 },
                 "hardwareProfile": {
                   "vmSize": "[parameters('vmSize')]"
